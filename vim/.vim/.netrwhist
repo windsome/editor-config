@@ -1,8 +1,0 @@
-let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =6
-let g:netrw_dirhist_1='/home/dev/frontend/project1/webpack'
-let g:netrw_dirhist_2='/home/dev/frontend/test/bootstrap-sass/assets/stylesheets/bootstrap'
-let g:netrw_dirhist_3='/home/dev/frontend/react-redux-router-scss-node/app/scss/bootstrap/mixins'
-let g:netrw_dirhist_4='/home/dev/frontend/react-redux-router-scss-node/app/scss/bootstrap'
-let g:netrw_dirhist_5='/home/dev/frontend/react-redux-router-scss-node/app/scss/bootstrap/mixins'
-let g:netrw_dirhist_6='/home/dev/frontend/react-redux-router-scss-node/app/scss/bootstrap'
