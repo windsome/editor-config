@@ -226,7 +226,7 @@ the indentation.  Otherwise it retains the same position on the line"
 ;;
 ;; Indentation increment.
 ;;
-(defvar cmake-tab-width 4)
+(defvar cmake-tab-width 2)
 
 ;------------------------------------------------------------------------------
 
@@ -337,3 +337,4 @@ optional argument topic will be appended to the argument list."
 (provide 'cmake-mode)
 
 ;;; cmake-mode.el ends here
+

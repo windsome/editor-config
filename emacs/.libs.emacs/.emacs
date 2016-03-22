@@ -8,6 +8,20 @@
 (load "lyk.macro.el")
 
 ;;--------------------------------------------------------------------------------
+;; PHP-MODE
+;;
+;(require 'php-mode)
+;(add-to-list 'auto-mode-alist '("\\.php[34]?\\'\\|\\.phtml\\'" . php-mode))
+;(add-to-list 'auto-mode-alist '("\\.module\\'" . php-mode))
+;(add-to-list 'auto-mode-alist '("\\.inc\\'" . php-mode))
+
+(autoload 'js2-mode "js2-mode" nil t)
+(add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
+(add-to-list 'auto-mode-alist '("\\.json$" . js2-mode))
+(autoload 'espresso-mode "espresso")
+
+;(require 'js2-highlight-vars)
+;;--------------------------------------------------------------------------------
 ;;(global-set-key [f10] 'ejecuta-instruccion)
 (global-set-key [f10] 'gud-next)
 (global-set-key [f12] 'gud-down)
@@ -64,6 +78,26 @@
 ;; (setq time-stamp-format "%:u %02m/%02d/%04y %02H02M02S")
 
 (global-set-key "\M-g" 'goto-line)
+
+
+; Add cmake listfile names to the mode list.
+(setq auto-mode-alist
+	  (append
+	   '(("CMakeLists\\.txt\\'" . cmake-mode))
+	   '(("\\.cmake\\'" . cmake-mode))
+	   auto-mode-alist))
+
+(autoload 'cmake-mode "cmake-mode.el" t)
+
+
+(require 'doxymacs)
+
+(add-hook 'c-mode-common-hook 'doxymacs-mode) 
+
+(defun my-doxymacs-font-lock-hook ()
+  (if (or (eq major-mode 'c-mode) (eq major-mode 'c++-mode))
+      (doxymacs-font-lock)))
+(add-hook 'font-lock-mode-hook 'my-doxymacs-font-lock-hook)
 
 ;; list all the lines of the current buffer matching a regrep
 (global-set-key "\M-o" 'occur)
@@ -464,3 +498,130 @@ occurence of CHAR."
 
 
 (setq-default indent-tabs-mode nil)
+(custom-set-variables
+  ;; custom-set-variables was added by Custom.
+  ;; If you edit it by hand, you could mess it up, so be careful.
+  ;; Your init file should contain only one such instance.
+  ;; If there is more than one, they won't work right.
+ '(doxymacs-doxygen-style "JavaDoc")
+ '(speedbar-frame-parameters (quote ((minibuffer) (width . 20) (border-width . 0) (menu-bar-lines . 0) (tool-bar-lines . 0) (unsplittable . t) (set-background-color "black")))))
+(custom-set-faces
+  ;; custom-set-faces was added by Custom.
+  ;; If you edit it by hand, you could mess it up, so be careful.
+  ;; Your init file should contain only one such instance.
+  ;; If there is more than one, they won't work right.
+ '(background "blue")
+ '(font-lock-builtin-face ((((class color) (background dark)) (:foreground "Turquoise"))))
+ '(font-lock-comment-face ((t (:foreground "MediumAquamarine"))))
+ '(font-lock-constant-face ((((class color) (background dark)) (:bold t :foreground "DarkOrchid"))))
+ '(font-lock-doc-string-face ((t (:foreground "green2"))))
+ '(font-lock-function-name-face ((t (:foreground "SkyBlue"))))
+ '(font-lock-keyword-face ((t (:bold t :foreground "CornflowerBlue"))))
+ '(font-lock-preprocessor-face ((t (:italic nil :foreground "CornFlowerBlue"))))
+ '(font-lock-reference-face ((t (:foreground "DodgerBlue"))))
+ '(font-lock-string-face ((t (:foreground "LimeGreen"))))
+ '(font-lock-type-face ((t (:foreground "#9290ff"))))
+ '(font-lock-variable-name-face ((t (:foreground "PaleGreen"))))
+ '(font-lock-warning-face ((((class color) (background dark)) (:foreground "yellow" :background "red"))))
+ '(highlight ((t (:background "CornflowerBlue"))))
+ '(list-mode-item-selected ((t (:background "gold"))))
+ '(makefile-space-face ((t (:background "wheat"))) t)
+ '(mode-line ((t (:background "Navy"))))
+ '(paren-match ((t (:background "darkseagreen4"))))
+ '(region ((t (:background "DarkSlateBlue"))))
+ '(show-paren-match ((t (:foreground "black" :background "wheat"))))
+ '(show-paren-mismatch ((((class color)) (:foreground "white" :background "red"))))
+ '(speedbar-button-face ((((class color) (background dark)) (:foreground "green4"))))
+ '(speedbar-directory-face ((((class color) (background dark)) (:foreground "khaki"))))
+ '(speedbar-file-face ((((class color) (background dark)) (:foreground "cyan"))))
+ '(speedbar-tag-face ((((class color) (background dark)) (:foreground "Springgreen"))))
+ '(vhdl-speedbar-architecture-selected-face ((((class color) (background dark)) (:underline t :foreground "Blue"))))
+ '(vhdl-speedbar-entity-face ((((class color) (background dark)) (:foreground "darkGreen"))))
+ '(vhdl-speedbar-entity-selected-face ((((class color) (background dark)) (:underline t :foreground "darkGreen"))))
+ '(vhdl-speedbar-package-face ((((class color) (background dark)) (:foreground "black"))))
+ '(vhdl-speedbar-package-selected-face ((((class color) (background dark)) (:underline t :foreground "black"))))
+ '(widget-field ((((class grayscale color) (background light)) (:background "DarkBlue")))))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun my-js2-indent-function ()
+  (interactive)
+  (save-restriction
+    (widen)
+    (let* ((inhibit-point-motion-hooks t)
+           (parse-status (save-excursion (syntax-ppss (point-at-bol))))
+           (offset (- (current-column) (current-indentation)))
+           (indentation (espresso--proper-indentation parse-status))
+           node)
+
+      (save-excursion
+
+        ;; I like to indent case and labels to half of the tab width
+        (back-to-indentation)
+        (if (looking-at "case\\s-")
+            (setq indentation (+ indentation (/ espresso-indent-level 2))))
+
+        ;; consecutive declarations in a var statement are nice if
+        ;; properly aligned, i.e:
+        ;;
+        ;; var foo = "bar",
+        ;;     bar = "foo";
+        (setq node (js2-node-at-point))
+        (when (and node
+                   (= js2-NAME (js2-node-type node))
+                   (= js2-VAR (js2-node-type (js2-node-parent node))))
+          (setq indentation (+ 4 indentation))))
+
+      (indent-line-to indentation)
+      (when (> offset 0) (forward-char offset)))))
+
+(defun my-indent-sexp ()
+  (interactive)
+  (save-restriction
+    (save-excursion
+      (widen)
+      (let* ((inhibit-point-motion-hooks t)
+             (parse-status (syntax-ppss (point)))
+             (beg (nth 1 parse-status))
+             (end-marker (make-marker))
+             (end (progn (goto-char beg) (forward-list) (point)))
+             (ovl (make-overlay beg end)))
+        (set-marker end-marker end)
+        (overlay-put ovl 'face 'highlight)
+        (goto-char beg)
+        (while (< (point) (marker-position end-marker))
+          ;; don't reindent blank lines so we don't set the "buffer
+          ;; modified" property for nothing
+          (beginning-of-line)
+          (unless (looking-at "\\s-*$")
+            (indent-according-to-mode))
+          (forward-line))
+        (run-with-timer 0.5 nil '(lambda(ovl)
+                                   (delete-overlay ovl)) ovl)))))
+
+(defun my-js2-mode-hook ()
+  (require 'espresso)
+  (setq espresso-indent-level 4
+        indent-tabs-mode nil
+        c-basic-offset 4)
+  (c-toggle-auto-state 0)
+  (c-toggle-hungry-state 1)
+  (set (make-local-variable 'indent-line-function) 'my-js2-indent-function)
+  (define-key js2-mode-map [(meta control |)] 'cperl-lineup)
+  (define-key js2-mode-map [(meta control \;)] 
+    '(lambda()
+       (interactive)
+       (insert "/* -----[ ")
+       (save-excursion
+         (insert " ]----- */"))
+       ))
+  (define-key js2-mode-map [(return)] 'newline-and-indent)
+  (define-key js2-mode-map [(backspace)] 'c-electric-backspace)
+  (define-key js2-mode-map [(control d)] 'c-electric-delete-forward)
+  (define-key js2-mode-map [(control meta q)] 'my-indent-sexp)
+  (if (featurep 'js2-highlight-vars)
+    (js2-highlight-vars-mode))
+  (message "My JS2 hook"))
+
+(add-hook 'js2-mode-hook 'my-js2-mode-hook)
